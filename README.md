@@ -1,0 +1,2 @@
+# rcm
+Rust CLI menu
