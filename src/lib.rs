@@ -11,7 +11,7 @@ pub trait MenuFunc {
 pub struct Menu {
     elements: Vec<MenuItem>,
     title: String,
-    selected: u32,
+    selected: usize,
 }
 
 pub struct MenuBuilder {
@@ -28,18 +28,75 @@ impl Menu {
         self.title
     }
 
-    fn print_menu(self) {
-        for item in self.elements {
+    fn print_menu(&self) {
+        for (ind, item) in self.elements.iter().enumerate() {
+            if ind == self.selected {
+                match item {
+                    MenuItem::Menu(menu) => println!("{}",
+                                                    console::style(
+                                                        format!(">> Menu: {}", menu.title)
+                                                        ).bold()
+                                                    ),
+                    MenuItem::Func(func) => println!("{}",
+                                                    console::style(
+                                                        format!(">> Func: {}", func.get_title())
+                                                        ).bold()
+                                                    ),
+                }
+                continue;
+            }
+
             match item {
-                MenuItem::Menu(menu) => println!("Menu: {}", menu.title),
-                MenuItem::Func(func) => println!("Func: {}", func.get_title()),
+                MenuItem::Menu(menu) => println!("   Menu: {}", menu.title),
+                MenuItem::Func(func) => println!("   Func: {}", func.get_title()),
             }
         }
     }
 
-    pub fn run(self) {
+    pub fn run(mut self) {
+        println!("{}", termion::clear::All);
         self.print_menu();
+        let term = console::Term::stdout();
 
+        loop {
+            let res = term.read_char();
+
+            match res {
+                Ok('q') | Err(_) => break,
+                Ok('k') => self.nav_up(),
+                Ok('j') => self.nav_down(),
+                Ok('l') => self.call_selected(),
+                _ => continue,
+            };
+
+            println!("{}", termion::clear::All);
+            self.print_menu();
+        }
+    }
+
+    fn nav_up(&mut self) {
+        if self.selected == 0 {
+            self.selected = self.elements.len() - 1;
+            return;
+        }
+        self.selected -= 1;
+    }
+
+    fn nav_down(&mut self) {
+        if self.selected >= self.elements.len() - 1 {
+            self.selected = 0;
+            return;
+        }
+        self.selected += 1;
+    }
+
+    fn call_selected(&mut self) {
+        let el = &self.elements[self.selected];
+
+        match el {
+            MenuItem::Func(f) => {},
+            MenuItem::Menu(m) => {},
+        };
     }
 }
 

@@ -29,6 +29,10 @@ impl rcm::MenuFunc for TestMenuItem {
 fn main() {
     let test_menu_1 = rcm::MenuBuilder::empty()
         .push_func(Box::new(TestMenuItem::new()))
+        .push_func(Box::new(TestMenuItem::new()))
+        .push_func(Box::new(TestMenuItem::new()))
+        .push_func(Box::new(TestMenuItem::new()))
+        .push_func(Box::new(TestMenuItem::new()))
         .build();
     test_menu_1.run();
 }
